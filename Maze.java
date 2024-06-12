@@ -156,7 +156,7 @@ public class Maze implements Iterable<Maze.Punkt>  {
             if(place.getWiersz()==start.getWiersz() && place.getKolumna()==start.getKolumna()) break;
             kolejne.add(place);
             int nn=place.getWiersz();
-            if(nn==0) return;
+
             int mm=place.getKolumna();
             if(place.getWiersz()>0)
             {
