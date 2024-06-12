@@ -176,7 +176,7 @@ public class Maze implements Iterable<Maze.Punkt>  {
             }
             if(place.getKolumna()>0)
             {
-               // System.out.println("fskdfjskfd");
+                // System.out.println("fskdfjskfd");
                 if(dist[nn][mm-1]==dist[nn][mm]-1)
                 {
                     place=new Punkt(nn,mm-1);
