@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Ekran extends JFrame {
     private Tile[][] tab;
@@ -24,7 +25,7 @@ public class Ekran extends JFrame {
     public Ekran(Maze ma) {
         n = ma.getN();
         m = ma.getM();
-        setTitle("Animacja");
+        setTitle("Labyrinth Slayer");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(new Dimension(1024, 1024));
         this.setMaximumSize(new Dimension(1024, 1024));
@@ -77,15 +78,29 @@ public class Ekran extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
+
+                // Dodanie filtrów dla plików .bin i .txt
+                FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                        "Pliki tekstowe i binarne", "txt", "bin");
+                fileChooser.setFileFilter(filter);
+                fileChooser.addChoosableFileFilter(filter);
+
                 int result = fileChooser.showOpenDialog(Ekran.this);
+
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
+
+                    // Możesz dalej kontynuować z operacjami na wybranym pliku
+                    labirynt.loadFromFile(selectedFile.getPath());
+                    Maze labirynt = new Maze();
                     labirynt.loadFromFile(selectedFile.getPath());
                     System.out.println(labirynt.BFS());
                     labirynt.goBack();
+
                     for (Maze.Punkt x : labirynt) {
                         System.out.println(x);
                     }
+
                     Ekran teraz = new Ekran(labirynt);
                     teraz.koloruj(labirynt,false);
                 }
@@ -208,11 +223,6 @@ public class Ekran extends JFrame {
 
             }
         }
-        /*
-        gridPanel.remove(2);
-        tab[0][2].setBackground(Color.BLUE);
-        gridPanel.add(tab[0][2],2);*/
-
 
         if(sciezka)
         {
@@ -239,7 +249,7 @@ public class Ekran extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Maze labirynt = new Maze();
-                labirynt.loadFromFile("C:\\Pulpit\\lab.txt");
+                labirynt.loadFromFile("maze21x21.bin");
                 Ekran teraz = new Ekran(labirynt); // Tworzy ekran z gridem 5x5 bez ścieżki
             }
         });

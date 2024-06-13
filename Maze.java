@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class Maze implements Iterable<Maze.Punkt>  {
@@ -130,7 +128,120 @@ public class Maze implements Iterable<Maze.Punkt>  {
         }
         return -1;
     }
-    void loadFromFile(String filename)
+
+    public void loadFromFile(String filename) {
+        if (filename.endsWith(".txt")) {
+            loadFromTextFile(filename);
+        } else if (filename.endsWith(".bin")) {
+            loadFromBinaryFile(filename);
+        } else {
+            System.out.println("Plik nieobslugiwany (zly typ)!");
+        }
+    }
+
+
+    private static class MazeHeader {
+        int fileId;
+        byte escape;
+        short columns;
+        short lines;
+        short entryX;
+        short entryY;
+        short exitX;
+        short exitY;
+        byte[] reserved = new byte[12];
+        int counter;
+        int solutionOffset;
+        byte separator;
+        byte wall;
+        byte path;
+    }
+
+    private void loadFromBinaryFile(String filename) {
+        try (DataInputStream dis = new DataInputStream(new FileInputStream(filename))) {
+            MazeHeader header = new MazeHeader();
+            header.fileId = dis.readInt();
+            header.escape = dis.readByte();
+            header.columns = dis.readShort();
+            header.lines = dis.readShort();
+            header.entryX = dis.readShort();
+            header.entryY = dis.readShort();
+            header.exitX = dis.readShort();
+            header.exitY = dis.readShort();
+            dis.skipBytes(12);
+            header.counter = dis.readInt();
+            header.solutionOffset = dis.readInt();
+            header.separator = (byte) (dis.readByte() & 0xFF);
+            header.wall = (byte) (dis.readByte() & 0xFF);
+            header.path = (byte) (dis.readByte() & 0xFF);
+
+            short columns = Short.reverseBytes(header.columns);
+            int fileId = Integer.reverseBytes(header.fileId);
+            short lines = Short.reverseBytes(header.lines);
+            short entryX = Short.reverseBytes(header.entryX);
+            short entryY = Short.reverseBytes(header.entryY);
+            short exitX = Short.reverseBytes(header.exitX);
+            short exitY = Short.reverseBytes(header.exitY);
+            byte[] reserved = new byte[12];
+            int counter = Integer.reverseBytes(header.counter);
+            int solutionOffset = Integer.reverseBytes(header.solutionOffset);
+
+
+            int suma = 0;
+            byte[] values = new byte[3];
+            int row = 0;
+            int col = 0;
+            int ile;
+            int iloraz = (int)(columns*lines);
+            for(int i=0; i<iloraz; i+=(ile+1)) {
+                for (int j = 0; j < 3; j++) {
+                    values[j] = (byte) (dis.readByte() & 0xFF);
+                }
+
+                ile = (int) values[2];
+                if(ile == -1) {
+                    ile = 512;
+                }
+
+
+                if (values[1] == header.wall) {
+                    for(int ii = 0; ii<=ile; ii++){
+                        maze[row][col] = 'X';
+                        col++;
+                        if(col>=columns){
+                            col%=columns;
+                            row++;
+                        }
+                        suma++;
+                    }
+
+                } else if (values[1] == header.path) {
+                    for(int ii = 0; ii<=ile; ii++){
+                        maze[row][col] = ' ';
+                        col++;
+                        if(col>=columns){
+                            col%=columns;
+                            row++;
+                        }
+                        suma++;
+                    }
+                }
+            }
+
+            start = new Punkt(entryY-1, entryX-1);
+            stop = new Punkt(exitY-1, exitX-1);
+            maze[entryY-1][entryX-1] = 'P';
+            maze[exitY-1][exitX-1] = 'K';
+
+            podajRozmiar(lines, columns);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    void loadFromTextFile(String filename)
     {
         try
         {
@@ -142,11 +253,15 @@ public class Maze implements Iterable<Maze.Punkt>  {
             while ((line = reader.readLine()) != null) {
                 pom=line.length();
                 for (int col = 0; col < line.length(); col++) {
-                    maze[row][col] = line.charAt(col);
-                    if(maze[row][col]=='P') start=new Punkt(row,col);
-                    else if(maze[row][col]=='K') stop=new Punkt(row,col);
+                    try {
+                        maze[row][col] = line.charAt(col);
+                        if (maze[row][col] == 'P') start = new Punkt(row, col);
+                        else if (maze[row][col] == 'K') stop = new Punkt(row, col);
+                    } catch (Exception e) {
+                        System.err.println("Coś się nie zgadza z plikiem: " + e.getMessage());
+                        System.exit(1);
+                    }
                 }
-                System.out.println(line);
                 row++;
             }
             podajRozmiar(row,pom);
@@ -158,6 +273,8 @@ public class Maze implements Iterable<Maze.Punkt>  {
         }
 
     }
+
+
     void goBack()
     {
         for(int i=0;i<n;i++)
@@ -197,7 +314,6 @@ public class Maze implements Iterable<Maze.Punkt>  {
             }
             if(place.getKolumna()>0)
             {
-                // System.out.println("fskdfjskfd");
                 if(dist[nn][mm-1]==dist[nn][mm]-1)
                 {
                     place=new Punkt(nn,mm-1);
