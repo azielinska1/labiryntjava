@@ -10,14 +10,7 @@ import javax.imageio.ImageIO;
 public class Ekran extends JFrame {
     private Tile[][] tab;
     private JPanel gridPanel;
-    private JButton findPathButton;
-    private JButton setStartButton;
-    private JButton setEndButton;
-    private JMenuItem loadMenuItem;
-    private JMenuItem saveMenuItem;
-    private Maze labirynt;
-    private boolean startKlik;
-    private boolean stopKlik;
+    private JButton button;
     int n;
     int m;
 
@@ -30,48 +23,31 @@ public class Ekran extends JFrame {
         this.setMaximumSize(new Dimension(1024, 1024));
         //this.setResizable(false);
 
-        labirynt = ma;
-
         tab = new Tile[n][m];
-
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
                 tab[i][j] = new Tile(i, j);
                 tab[i][j].setSize(new Dimension(1024 / Math.max(n, m), 1024 / Math.max(n, m)));
-                final int ii=i;
-                final int jj=j;
-                tab[i][j].addMouseListener(new java.awt.event.MouseAdapter() {
-                    @Override
-                    public void mouseClicked(java.awt.event.MouseEvent evt) {
-                        if(startKlik && !(ii==labirynt.getStop().getWiersz() && jj==labirynt.getStop().getKolumna()) ) {
-
-                            labirynt.setStart(ii,jj);
-                            koloruj(labirynt,false);
-                            startKlik=false;
-                        }
-                        else if(stopKlik && !(ii==labirynt.getStart().getWiersz() && jj==labirynt.getStart().getKolumna()))
-                        {
-                            labirynt.setStop(ii,jj);
-                            koloruj(labirynt,false);
-                            stopKlik=false;
-                        }
-
-                    }
-                });
-
             }
         }
 
         gridPanel = new JPanel(new GridLayout(n, m));
-
-        koloruj(labirynt,false);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                gridPanel.add(tab[i][j]);
+            }
+        }
         add(gridPanel, BorderLayout.CENTER);
+
+        // Tworzenie przycisku
+        button = new JButton("Kliknij mnie!");
+        add(button, BorderLayout.SOUTH);
 
         // Tworzenie paska menu
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("Menu");
-        loadMenuItem = new JMenuItem("Wczytaj labirynt");
-        saveMenuItem = new JMenuItem("Zapisz obraz");
+        JMenuItem loadMenuItem = new JMenuItem("Wczytaj labirynt");
+        JMenuItem saveMenuItem = new JMenuItem("Zapisz obraz");
 
         loadMenuItem.addActionListener(new ActionListener() {
             @Override
@@ -80,14 +56,13 @@ public class Ekran extends JFrame {
                 int result = fileChooser.showOpenDialog(Ekran.this);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
+                    Maze labirynt = new Maze();
                     labirynt.loadFromFile(selectedFile.getPath());
                     System.out.println(labirynt.BFS());
                     labirynt.goBack();
-                    for (Maze.Punkt x : labirynt) {
-                        System.out.println(x);
-                    }
-                    Ekran teraz = new Ekran(labirynt);
-                    teraz.koloruj(labirynt,false);
+                    
+                    Ekran teraz = new Ekran(labirynt); // Tworzy ekran z gridem 5x5
+                    teraz.koloruj(labirynt);
                 }
             }
         });
@@ -119,119 +94,28 @@ public class Ekran extends JFrame {
         menuBar.add(fileMenu);
         setJMenuBar(menuBar);
 
-        // Tworzenie panelu narzędziowego
-        JPanel toolbarPanel = new JPanel();
-        toolbarPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-
-        findPathButton = new JButton("Znajdź najkrótszą ścieżkę");
-        setStartButton = new JButton("Wybierz start");
-        setEndButton = new JButton("Wybierz koniec");
-
-        toolbarPanel.add(findPathButton);
-        toolbarPanel.add(setStartButton);
-        toolbarPanel.add(setEndButton);
-
-        add(toolbarPanel, BorderLayout.NORTH);
-
         // Ustawienia rozmiaru i widoczności
         pack();
         setVisible(true);
-
-        // Dodanie action listeners dla przycisków
-        findPathButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                labirynt.BFS();
-                labirynt.goBack();
-                koloruj(labirynt,true);
-            }
-        });
-
-        setStartButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Implementacja zmiany pola startowego
-                    startKlik=true;
-                    stopKlik=false;
-            }
-        });
-
-        setEndButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                stopKlik=true;
-                startKlik=false;
-            }
-        });
-
-        // Kolorowanie labiryntu bez rysowania ścieżki
-        //koloruj(labirynt);
     }
 
-    void koloruj(Maze ma, boolean sciezka) {
-        gridPanel.updateUI();
-        gridPanel.removeAll();
+    void koloruj(Maze ma) {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
-                tab[i][j] = new Tile(i, j);
-                final int ii=i;
-                final int jj=j;
-                tab[i][j].addMouseListener(new java.awt.event.MouseAdapter() {
-                    @Override
-                    public void mouseClicked(java.awt.event.MouseEvent evt) {
-
-                        if(startKlik && !(ii==labirynt.getStop().getWiersz() && jj==labirynt.getStop().getKolumna()) ) {
-
-                            labirynt.setStart(ii,jj);
-                            koloruj(labirynt,false);
-                            startKlik=false;
-                        }
-                        else if(stopKlik && !(ii==labirynt.getStart().getWiersz() && jj==labirynt.getStart().getKolumna()))
-                        {
-                            labirynt.setStop(ii,jj);
-                            koloruj(labirynt,false);
-                            stopKlik=false;
-                        }
-
-                    }
-                });
-                tab[i][j].setSize(new Dimension(1024 / Math.max(n, m), 1024 / Math.max(n, m)));
                 if (ma.getPole(i, j) == 'X') {
                     tab[i][j].setBackground(Color.BLACK);
-                } else if (ma.getStart().getWiersz() == i && ma.getStart().getKolumna()==j ) {
+                } else if (ma.getPole(i, j) == 'P') {
                     tab[i][j].setBackground(Color.GREEN);
-                } else if (ma.getStop().getWiersz() == i && ma.getStop().getKolumna()==j) {
+                } else if (ma.getPole(i, j) == 'K') {
                     tab[i][j].setBackground(Color.RED);
-                } else {
-                    tab[i][j].setBackground(Color.WHITE);
                 }
-
             }
         }
-        /*
-        gridPanel.remove(2);
-        tab[0][2].setBackground(Color.BLUE);
-        gridPanel.add(tab[0][2],2);*/
-
-
-        if(sciezka)
-        {
-            for (Maze.Punkt x : ma) {
-                tab[x.getWiersz()][x.getKolumna()].setBackground(Color.PINK);
-            }
+        for (Maze.Punkt x : ma) {
+            tab[x.getWiersz()][x.getKolumna()].setBackground(Color.PINK);
         }
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                gridPanel.add(tab[i][j]);
-            }
-        }
-        gridPanel.repaint();
-        gridPanel.revalidate();
-        // Resetowanie kolorowania dla punktu startowego i końcowego (poprawne początkowe oznaczenie)
         tab[ma.getStart().getWiersz()][ma.getStart().getKolumna()].setBackground(Color.GREEN);
         tab[ma.getStop().getWiersz()][ma.getStop().getKolumna()].setBackground(Color.RED);
-
     }
 
     public static void main(String[] args) {
@@ -239,8 +123,14 @@ public class Ekran extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Maze labirynt = new Maze();
-                labirynt.loadFromFile("C:\\Pulpit\\lab.txt");
-                Ekran teraz = new Ekran(labirynt); // Tworzy ekran z gridem 5x5 bez ścieżki
+                labirynt.loadFromFile("maze21x21.bin");
+                System.out.println(labirynt.BFS());
+                labirynt.goBack();
+                for (Maze.Punkt x : labirynt) {
+                    System.out.println(x);
+                }
+                Ekran teraz = new Ekran(labirynt); // Tworzy ekran z gridem 5x5
+                teraz.koloruj(labirynt);
             }
         });
     }
