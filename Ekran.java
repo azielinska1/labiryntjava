@@ -250,7 +250,7 @@ public class Ekran extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Maze labirynt = new Maze();
-                labirynt.loadFromFile("C:\\Users\\aleks\\IdeaProjects\\labirynth\\out\\production\\labirynth\\maze21x21.bin");
+                labirynt.loadFromFile("maze21x21.bin");
                 Ekran teraz = new Ekran(labirynt); // Tworzy ekran z gridem 5x5 bez ścieżki
             }
         });
