@@ -68,7 +68,7 @@ public class Ekran extends JFrame {
         koloruj(labirynt,false);
         add(gridPanel, BorderLayout.CENTER);
 
-        // Tworzenie paska menu
+        //Tworzenie paska menu
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("Menu");
         loadMenuItem = new JMenuItem("Wczytaj labirynt");
@@ -79,7 +79,7 @@ public class Ekran extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
 
-                // Dodanie filtrów dla plików .bin i .txt
+                //Dodanie filtrów dla plików .bin i .txt
                 FileNameExtensionFilter filter = new FileNameExtensionFilter(
                         "Pliki tekstowe i binarne", "txt", "bin");
                 fileChooser.setFileFilter(filter);
@@ -90,8 +90,9 @@ public class Ekran extends JFrame {
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
 
-                    // Możesz dalej kontynuować z operacjami na wybranym pliku
+
                     labirynt.loadFromFile(selectedFile.getPath());
+                    setVisible(false);
                     Maze labirynt = new Maze();
                     labirynt.loadFromFile(selectedFile.getPath());
                     System.out.println(labirynt.BFS());
@@ -166,8 +167,8 @@ public class Ekran extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Implementacja zmiany pola startowego
-                    startKlik=true;
-                    stopKlik=false;
+                startKlik=true;
+                stopKlik=false;
             }
         });
 
@@ -249,7 +250,7 @@ public class Ekran extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Maze labirynt = new Maze();
-                labirynt.loadFromFile("maze21x21.bin");
+                labirynt.loadFromFile("C:\\Users\\aleks\\IdeaProjects\\labirynth\\out\\production\\labirynth\\maze21x21.bin");
                 Ekran teraz = new Ekran(labirynt); // Tworzy ekran z gridem 5x5 bez ścieżki
             }
         });
