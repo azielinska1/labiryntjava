@@ -12,9 +12,22 @@ public class Maze implements Iterable<Maze.Punkt>  {
     private Punkt stop;
     private ArrayList<Punkt> kolejne;
     public ArrayList<Punkt> wszystkie;
-
+    void czysc()
+    {
+        for(int i=0;i<n;i++)
+        {
+            for(int j=0;j<m;j++)
+            {
+                dist[i][j] = -1;
+            }
+        }
+        kolejne.clear();
+        wszystkie.clear();
+    }
     Maze()
     {
+        kolejne=new ArrayList<>();
+        wszystkie=new ArrayList<>();
         maze=new char[2050][2050];
         dist=new int[2050][2050];
     }
@@ -33,6 +46,12 @@ public class Maze implements Iterable<Maze.Punkt>  {
     Punkt getStop()
     {
         return stop;
+    }
+    void setStart(int p1, int p2){
+        start=new Punkt(p1,p2);
+    }
+    void setStop(int p1, int p2){
+        stop=new Punkt(p1,p2);
     }
     int getN()
     {
@@ -58,6 +77,7 @@ public class Maze implements Iterable<Maze.Punkt>  {
 
     int BFS()
     {
+        czysc();
         Queue<Punkt> q=new LinkedList<Punkt>();
         Punkt p=new Punkt(start.getWiersz(),start.getKolumna());
         q.add(p);
@@ -69,10 +89,10 @@ public class Maze implements Iterable<Maze.Punkt>  {
             Punkt teraz=q.poll();
             int nn=teraz.getWiersz();
             int mm= teraz.getKolumna();
-            if(maze[nn][mm]=='K') return dist[nn][mm];
+            if(stop.getWiersz()==nn && stop.getKolumna()==mm) return dist[nn][mm];
             if(teraz.getWiersz()>0)
             {
-                if(dist[nn-1][mm]==-1 && maze[nn-1][mm]!='X')
+                if(dist[nn-1][mm]==-1 && (maze[nn-1][mm]!='X' || (stop.getWiersz()==(nn-1) && stop.getKolumna()==(mm)) ))
                 {
                     dist[nn-1][mm]=dist[nn][mm]+1;
                     q.offer(new Punkt(nn-1,mm));
@@ -81,7 +101,7 @@ public class Maze implements Iterable<Maze.Punkt>  {
             }
             if(teraz.getWiersz()<(n-1))
             {
-                if(dist[nn+1][mm]==-1 && maze[nn+1][mm]!='X' )
+                if(dist[nn+1][mm]==-1 && (maze[nn+1][mm]!='X'|| (stop.getWiersz()==(nn+1) && stop.getKolumna()==(mm)) ) )
                 {
                     dist[nn+1][mm]=dist[nn][mm]+1;
                     q.offer(new Punkt(nn+1,mm));
@@ -90,7 +110,7 @@ public class Maze implements Iterable<Maze.Punkt>  {
             }
             if(teraz.getKolumna()>0)
             {
-                if(dist[nn][mm-1]==-1 && maze[nn][mm-1]!='X')
+                if(dist[nn][mm-1]==-1 && (maze[nn][mm-1]!='X'|| (stop.getWiersz()==(nn) && stop.getKolumna()==(mm-1)) ))
                 {
                     dist[nn][mm-1]=dist[nn][mm]+1;
                     q.offer(new Punkt(nn,mm-1));
@@ -99,7 +119,7 @@ public class Maze implements Iterable<Maze.Punkt>  {
             }
             if(teraz.getKolumna()<(m-1))
             {
-                if(dist[nn][mm+1]==-1 && maze[nn][mm+1]!='X')
+                if(dist[nn][mm+1]==-1 && (maze[nn][mm+1]!='X' || (stop.getWiersz()==(nn) && stop.getKolumna()==(mm+1)) ))
                 {
                     dist[nn][mm+1]=dist[nn][mm]+1;
                     q.offer(new Punkt(nn,mm+1));
@@ -153,6 +173,7 @@ public class Maze implements Iterable<Maze.Punkt>  {
         Punkt place = stop;
         int w=dist[stop.getWiersz()][stop.getKolumna()];
         while(place != start) {
+            System.out.println("->"+place);
             if(place.getWiersz()==start.getWiersz() && place.getKolumna()==start.getKolumna()) break;
             kolejne.add(place);
             int nn=place.getWiersz();
